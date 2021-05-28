@@ -1,10 +1,19 @@
 <script>
-	import { io } from 'socket.io-client';
+	import { io, Socket } from 'socket.io-client';
 	import { onMount } from 'svelte';
+	let socket;
+	let onMessage;
 	onMount(() => {
-		const socket = io('http://localhost:4000');
-		console.log(socket);
+		onMessage = () => {
+			console.log(message);
+			socket.emit('new message', message);
+			message = '';
+		};
+		socket = io('http://localhost:4001');
+		socket.emit('message', 'hakunamatata');
 	});
+	let message;
 </script>
 
-<h1>Hello</h1>
+<input type="text" bind:value={message} />
+<button on:click={onMessage}>Send</button>
