@@ -49,6 +49,7 @@ export const userSocketIO = (server: ExtendedSocket) => {
             socket.broadcast.emit('new message', message);
         });
         socket.on('disconnect', function () {
+            socket.broadcast.emit('user disconnected', socket.userName + ' disconnected');
             console.log('A user disconnected');
         });
     });

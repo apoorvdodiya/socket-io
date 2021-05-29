@@ -1,7 +1,7 @@
 <script>
 	import { io, Socket } from 'socket.io-client';
 	import { onMount } from 'svelte';
-import { writable } from 'svelte/store';
+	import { writable } from 'svelte/store';
 	let socket;
 	let onMessageSend;
 	let message;
@@ -17,13 +17,13 @@ import { writable } from 'svelte/store';
 			let messageData = { message, user, userId };
 			console.log('message ', messageData);
 			$messages.push(messageData);
-			$messages = $messages
+			$messages = $messages;
 			socket.emit('message', messageData);
 			message = '';
 		};
 		updateSession(localStorage.getItem('session'));
 		if (session != null && session !== 'null') {
-			console.log('session is not null')
+			console.log('session is not null');
 			socket.auth = { sessionId: session };
 			connectSocket();
 		}
@@ -48,8 +48,13 @@ import { writable } from 'svelte/store';
 		socket.on('new message', (newMessage) => {
 			console.log('arriveed ', newMessage);
 			$messages.push(newMessage);
-			$messages = $messages
+			$messages = $messages;
 			console.log('updated ', $messages);
+		});
+		socket.on('user disconnected', (message) => {
+			console.log('disconnected ', message);
+			$messages.push({message});
+			$messages = $messages;
 		});
 	};
 	const updateSession = (userSession) => {
@@ -73,9 +78,13 @@ import { writable } from 'svelte/store';
 		<button on:click={onMessageSend}>Send</button>
 		<div>
 			Messages: {$messages.length}
-			{#each $messages as message}
-				<div>{message.message || '-'}</div>
-			{/each}
+			<div style="display: flex;flex-direction: column;">
+				{#each $messages as message}
+					<div style={`justify-self: ${message.user === user ? 'right' : 'left'};`}>
+						{message.message || '-'}
+					</div>
+				{/each}
+			</div>
 		</div>
 	{/if}
 </div>
