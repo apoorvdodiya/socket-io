@@ -43,8 +43,10 @@ export const userSocketIO = (server: ExtendedSocket) => {
             userId: socket.userId,
             userName: socket.userName,
         });
-        socket.on('new message', (message: any) => {
+        socket.on('message', (message: any) => {
             console.log('message ', message);
+            DBService.addMessage(message);
+            socket.broadcast.emit('new message', message);
         });
         socket.on('disconnect', function () {
             console.log('A user disconnected');

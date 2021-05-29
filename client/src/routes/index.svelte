@@ -1,35 +1,41 @@
 <script>
 	import { io, Socket } from 'socket.io-client';
 	import { onMount } from 'svelte';
+import { writable } from 'svelte/store';
 	let socket;
 	let onMessageSend;
 	let message;
-	let messages = [];
+	let messages = writable([]);
 	let user = '';
+	let userId = '';
 	let session = null;
 	onMount(() => {
 		socket = io('http://localhost:4001', {
 			autoConnect: false
 		});
 		onMessageSend = () => {
-			console.log(message);
-			socket.emit('new message', message);
+			let messageData = { message, user, userId };
+			console.log('message ', messageData);
+			$messages.push(messageData);
+			$messages = $messages
+			socket.emit('message', messageData);
 			message = '';
 		};
 		updateSession(localStorage.getItem('session'));
-		if (session !== null) {
+		if (session != null && session !== 'null') {
+			console.log('session is not null')
 			socket.auth = { sessionId: session };
 			connectSocket();
 		}
 	});
 	const onAddUser = () => {
-		
 		socket.auth = { userId: Math.random(), userName: user };
 		connectSocket();
 	};
 	const connectSocket = () => {
 		socket.connect();
 		socket.on('error', (error) => {
+			socket.disconnect();
 			console.log('error ', error);
 			updateSession(null);
 			user = '';
@@ -38,6 +44,12 @@
 			updateSession(sessionId);
 			user = userName;
 			localStorage.setItem('session', session);
+		});
+		socket.on('new message', (newMessage) => {
+			console.log('arriveed ', newMessage);
+			$messages.push(newMessage);
+			$messages = $messages
+			console.log('updated ', $messages);
 		});
 	};
 	const updateSession = (userSession) => {
@@ -59,11 +71,10 @@
 		<h1>Hi, {user}</h1>
 		Message:<input type="text" bind:value={message} />
 		<button on:click={onMessageSend}>Send</button>
-	{/if}
-	{#if session}
 		<div>
-			{#each messages as message}
-				<div>{message}</div>
+			Messages: {$messages.length}
+			{#each $messages as message}
+				<div>{message.message || '-'}</div>
 			{/each}
 		</div>
 	{/if}

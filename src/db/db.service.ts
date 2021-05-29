@@ -1,6 +1,6 @@
 export default class DBService {
     private static users = new Map();
-    private static messages = new Map();
+    private static messages = Array();
     private static sessions = new Map();
 
     public static getSession = (sid: any) => {
@@ -17,8 +17,11 @@ export default class DBService {
     public static getUser = (uid: any) => {
         return DBService.users.get(uid);
     }
-    public static setUser = (query: any) => {
-        return DBService.sessions.get(query.sessionId);
+    public static addMessage(message: any) {
+        DBService.messages.push(message);
+    }
+    public static getAllMessage() {
+        return DBService.messages;
     }
 }
 
