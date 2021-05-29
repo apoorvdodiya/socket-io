@@ -12,12 +12,12 @@ export const userSocketIO = (server: ExtendedSocket) => {
     });
 
     io.use((socket: ExtendedSocket, next) => {
-        console.log('socket.handshake.auth ', socket.handshake.auth);
-        
         if (socket.handshake.auth.sessionId) {
             socket.sessionId = socket.handshake.auth.sessionId;
             socket.userId = DBService.getSession(socket.handshake.auth.sessionId)
-            socket.UserName = DBService.getUser(socket.userId)
+            console.log('socket.userId ', socket.userId)
+            socket.userName = DBService.getUser(socket.userId)
+            console.log('socket.userName ', socket.userName)
             next();
         }
         if (socket.handshake.auth.userId) {
@@ -34,7 +34,6 @@ export const userSocketIO = (server: ExtendedSocket) => {
         }
     })
     io.on('connection', (socket: ExtendedSocket) => {
-        console.log('socket', socket.sessionId);
         socket.emit('session', {
             sessionId: socket.sessionId,
             userId: socket.userId,

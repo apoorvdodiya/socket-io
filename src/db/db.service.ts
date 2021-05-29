@@ -8,6 +8,7 @@ export default class DBService {
         return DBService.sessions.get(sid);
     }
     public static setSession = (sid: any, uid: any, userName: any) => {
+        console.log('userName ', userName);
         DBService.users.set(uid, userName || 'Anonymous');
         DBService.sessions.set(sid, uid);
         console.log('setSession ', DBService.users, DBService.sessions);
