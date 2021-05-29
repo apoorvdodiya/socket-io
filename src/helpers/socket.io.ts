@@ -13,12 +13,16 @@ export const userSocketIO = (server: ExtendedSocket) => {
 
     io.use((socket: ExtendedSocket, next) => {
         if (socket.handshake.auth.sessionId) {
+            if (!DBService.getSession(socket.handshake.auth.sessionId)) {
+                socket.sessionId = null;
+                socket.emit('error', 'user does not exists');
+                
+                return next();
+            }
             socket.sessionId = socket.handshake.auth.sessionId;
             socket.userId = DBService.getSession(socket.handshake.auth.sessionId)
-            console.log('socket.userId ', socket.userId)
             socket.userName = DBService.getUser(socket.userId)
-            console.log('socket.userName ', socket.userName)
-            next();
+            return next();
         }
         if (socket.handshake.auth.userId) {
             let sid = crypto.randomBytes(8).toString('hex');
@@ -30,7 +34,7 @@ export const userSocketIO = (server: ExtendedSocket) => {
             socket.sessionId = sid;
             socket.userId = socket.handshake.auth.userId;
             socket.userName = socket.handshake.auth.userName;
-            next();
+            return next();
         }
     })
     io.on('connection', (socket: ExtendedSocket) => {
