@@ -20,7 +20,7 @@ export default class DBService {
     public static addMessage(message: any) {
         DBService.messages.push(message);
     }
-    public static getAllMessage() {
+    public static getAllMessages() {
         return DBService.messages;
     }
 }

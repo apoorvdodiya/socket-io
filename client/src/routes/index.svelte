@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { io, Socket } from 'socket.io-client';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -40,9 +40,11 @@
 			updateSession(null);
 			user = '';
 		});
-		socket.on('session', ({ sessionId, userName }) => {
+		socket.on('session', ({ sessionId, userName, allMessages }) => {
 			updateSession(sessionId);
 			user = userName;
+			$messages = allMessages;
+			$messages = $messages;
 			localStorage.setItem('session', session);
 		});
 		socket.on('new message', (newMessage) => {
@@ -53,7 +55,12 @@
 		});
 		socket.on('user disconnected', (message) => {
 			console.log('disconnected ', message);
-			$messages.push({message});
+			$messages.push({ message });
+			$messages = $messages;
+		});
+		socket.on('user connect', (message) => {
+			console.log('disconnected ', message);
+			$messages.push({ message });
 			$messages = $messages;
 		});
 	};
@@ -67,24 +74,88 @@
 	};
 </script>
 
-<div>
+<div class="container-main">
 	{#if !session}
 		UserName: <input type="text" bind:value={user} />
-		<button on:click={onAddUser}>Add</button>
+		<button class="add-button" on:click={onAddUser}>Add</button>
 	{/if}
 	{#if session}
-		<h1>Hi, {user}</h1>
-		Message:<input type="text" bind:value={message} />
-		<button on:click={onMessageSend}>Send</button>
-		<div>
+		<h1 class="user-header">{user}</h1>
+		<div class="input-box">
+			<input class="message-input" type="text" bind:value={message} />
+			<button class="send-button" on:click={onMessageSend}>Send</button>
+		</div>
+		<div class="message-container">
 			Messages: {$messages.length}
-			<div style="display: flex;flex-direction: column;">
+			<div class="message-flex">
 				{#each $messages as message}
-					<div style={`justify-self: ${message.user === user ? 'right' : 'left'};`}>
+					<span
+						class="message"
+						style={`align-self: ${message.user === user ? 'flex-end' : 'flex-start'};`}
+					>
+						{#if message.user !== user}
+							<div class="message-from">
+								~{message.user}
+							</div>
+						{/if}
 						{message.message || '-'}
-					</div>
+					</span>
 				{/each}
 			</div>
 		</div>
 	{/if}
 </div>
+
+<style>
+	.container-main {
+		margin: 50px 250px;
+		border: solid;
+		border-radius: 20px;
+		height: calc(100vh - 150px);
+		padding: 20px;
+		overflow: auto;
+	}
+	.user-header {
+		margin-bottom: 5px;
+		font-family: Arial, Helvetica, sans-serif;
+		border-bottom: 2px solid;
+	}
+
+	.input-box {
+		height: 30px;
+		padding: 10px;
+		margin-bottom: 10px;
+	}
+
+	.message-input {
+		font-size: 20px;
+		width: calc(100% - 90px);
+	}
+
+	.send-button {
+		font-size: 20px;
+		width: 70px;
+	}
+
+	.message-container {
+		font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+		font-size: 20px;
+	}
+
+	.message-flex {
+		display: flex;
+		flex-direction: column;
+	}
+	.message {
+		border: 1px solid;
+		border-radius: 10px;
+		max-width: 70%;
+		padding: 10px;
+		margin-top: 10px;
+	}
+	.message > .message-from {
+		display: flex;
+		margin-bottom: 5px;
+		font-size: 12px;
+	}
+</style>

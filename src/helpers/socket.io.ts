@@ -42,7 +42,9 @@ export const userSocketIO = (server: ExtendedSocket) => {
             sessionId: socket.sessionId,
             userId: socket.userId,
             userName: socket.userName,
+            allMessages: DBService.getAllMessages()
         });
+        socket.broadcast.emit('user connect', socket.userName + ' is connected')
         socket.on('message', (message: any) => {
             console.log('message ', message);
             DBService.addMessage(message);
